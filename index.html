@@ -15,50 +15,95 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="referrer" content="unsafe-url">
+    <meta name="referrer" content="same-origin">
     <title>HTTP Headers Viewer</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
-            max-width: 800px;
-            margin: 20px auto;
-            padding: 20px;
-            background-color: #f5f5f5;
+            font-family: monospace;
+            margin: 20px;
+            background: #f5f5f5;
         }
-        .header-container {
-            background-color: white;
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
             padding: 20px;
             border-radius: 8px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
-        .header-item {
+        .header {
             margin: 10px 0;
             padding: 10px;
             border-bottom: 1px solid #eee;
         }
-        .header-name {
+        .name {
             font-weight: bold;
             color: #2c3e50;
         }
-        .header-value {
+        .value {
             color: #34495e;
             word-break: break-all;
         }
     </style>
 </head>
 <body>
-    <div class="header-container">
+    <div class="container">
         <h1>HTTP Headers</h1>
-        <div id="headers">
-            <?php
-            foreach (getallheaders() as $name => $value) {
-                echo '<div class="header-item">';
-                echo '<div class="header-name">' . htmlspecialchars($name) . ':</div>';
-                echo '<div class="header-value">' . htmlspecialchars($value) . '</div>';
-                echo '</div>';
-            }
-            ?>
-        </div>
+        <div id="headers"></div>
     </div>
+
+    <script>
+        async function displayHeaders() {
+            const headersDiv = document.getElementById('headers');
+            
+            try {
+                // Make a request to the current page
+                const response = await fetch(window.location.href);
+                
+                // Get all headers
+                const headers = response.headers;
+                
+                // Display each header
+                headers.forEach((value, name) => {
+                    const headerDiv = document.createElement('div');
+                    headerDiv.className = 'header';
+                    headerDiv.innerHTML = `
+                        <span class="name">${name}:</span>
+                        <span class="value">${value}</span>
+                    `;
+                    headersDiv.appendChild(headerDiv);
+                });
+
+                // Also display request headers
+                const requestHeaders = new Headers();
+                requestHeaders.append('X-Requested-With', 'XMLHttpRequest');
+                
+                const requestResponse = await fetch(window.location.href, {
+                    headers: requestHeaders
+                });
+                
+                const requestHeaderDiv = document.createElement('div');
+                requestHeaderDiv.className = 'header';
+                requestHeaderDiv.innerHTML = '<h2>Request Headers</h2>';
+                headersDiv.appendChild(requestHeaderDiv);
+
+                requestResponse.headers.forEach((value, name) => {
+                    const headerDiv = document.createElement('div');
+                    headerDiv.className = 'header';
+                    headerDiv.innerHTML = `
+                        <span class="name">${name}:</span>
+                        <span class="value">${value}</span>
+                    `;
+                    headersDiv.appendChild(headerDiv);
+                });
+
+            } catch (error) {
+                headersDiv.innerHTML = `<div class="error">Error fetching headers: ${error.message}</div>`;
+            }
+        }
+
+        // Display headers when page loads
+        window.onload = displayHeaders;
+    </script>
 </body>
 </html>
